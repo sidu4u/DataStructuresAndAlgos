@@ -3,6 +3,8 @@ package trees;
 import java.util.*;
 
 public class DiameterOfNarrayTree {
+
+    static int diameter = -1;
     //If given P is [-1, 0, 0, 0, 3], then node 0 is the root and the whole tree looks like this
     //            0
     //          / | \
@@ -11,15 +13,25 @@ public class DiameterOfNarrayTree {
     //                 4
 
 
-    private static List<Integer>  getChildern(int parent,List<Integer> parents)
+    private static void getAdjList(List<Integer> parents,Map<Integer,List<Integer>> adjList,int root)
     {
-         // return all the indexes that have the value as parent
-          List<Integer> children = new ArrayList<>();
+        List<Integer> children = getChildern(root,parents);
+        adjList.put(root,children);
 
-        for (int i=0;i<parents.size();i++
+        for (int currentChild:children
              ) {
-            if(parents.get(i)==parent)
-            {
+            getAdjList(parents,adjList,currentChild);
+        }
+    }
+
+
+    private static List<Integer> getChildern(int parent, List<Integer> parents) {
+        // return all the indexes that have the value as parent
+        List<Integer> children = new ArrayList<>();
+
+        for (int i = 0; i < parents.size(); i++
+                ) {
+            if (parents.get(i) == parent) {
                 children.add(i);
             }
         }
@@ -28,109 +40,46 @@ public class DiameterOfNarrayTree {
 
     }
 
-    private static int getDiameter(List<Integer> parents,int root)
-    {
+    private static int getDiameter(Map<Integer,List<Integer>> adjList, int root) {
         // for each child recurr this method
-        Set<Integer> children = new SortedSet<Integer>() {
-            @Override
-            public Comparator<? super Integer> comparator() {
-                return null;
-            }
+        // each child returns its maximum height
+        // diameter:max + 2nd max +1
 
-            @Override
-            public SortedSet<Integer> subSet(Integer fromElement, Integer toElement) {
-                return null;
-            }
+        int diameterAtThisNode = -1;
+        List<Integer> childHeights = new ArrayList<>();
 
-            @Override
-            public SortedSet<Integer> headSet(Integer toElement) {
-                return null;
-            }
-
-            @Override
-            public SortedSet<Integer> tailSet(Integer fromElement) {
-                return null;
-            }
-
-            @Override
-            public Integer first() {
-                return null;
-            }
-
-            @Override
-            public Integer last() {
-                return null;
-            }
-
-            @Override
-            public int size() {
-                return 0;
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return false;
-            }
-
-            @Override
-            public boolean contains(Object o) {
-                return false;
-            }
-
-            @Override
-            public Iterator<Integer> iterator() {
-                return null;
-            }
-
-            @Override
-            public Object[] toArray() {
-                return new Object[0];
-            }
-
-            @Override
-            public <T> T[] toArray(T[] a) {
-                return null;
-            }
-
-            @Override
-            public boolean add(Integer integer) {
-                return false;
-            }
-
-            @Override
-            public boolean remove(Object o) {
-                return false;
-            }
-
-            @Override
-            public boolean containsAll(Collection<?> c) {
-                return false;
-            }
-
-            @Override
-            public boolean addAll(Collection<? extends Integer> c) {
-                return false;
-            }
-
-            @Override
-            public boolean retainAll(Collection<?> c) {
-                return false;
-            }
-
-            @Override
-            public boolean removeAll(Collection<?> c) {
-                return false;
-            }
-
-            @Override
-            public void clear() {
-
-            }
+        for (Integer child : adjList.get(root)
+                ) {
+            childHeights.add(getDiameter(adjList, child));
         }
 
-        for (Integer child:getChildern(root,parents)
-             ) {
-
+        if (childHeights.size() ==0) {
+            diameter=diameter<1?1:diameter;
+            return 1;
         }
+
+        if(childHeights.size() ==1)
+        {
+            diameter = childHeights.get(0)+1>diameter?childHeights.get(0)+1:diameter;
+            return childHeights.get(0)+1;
+        }
+
+        Collections.sort(childHeights);
+
+        diameterAtThisNode = childHeights.get(childHeights.size() - 1) + childHeights.get(childHeights.size() - 2) + 1;
+
+        diameter = diameterAtThisNode > diameter ? diameterAtThisNode : diameter;
+
+        return childHeights.get(childHeights.size() - 1) + 1;
+    }
+
+    public static void main(String[] args) {
+
+        Map<Integer,List<Integer>> adjList = new HashMap<>();
+        getAdjList(Arrays.asList(-1),adjList,-1);
+
+        getDiameter(adjList,-1);
+
+        System.out.println(diameter-1);
     }
 }
